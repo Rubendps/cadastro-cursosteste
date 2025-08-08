@@ -30,15 +30,22 @@ st.title("📋 Cadastro de Cursos")
 st.write("Preencha os dados abaixo para se inscrever em **um único curso**.")
 
 curso = st.selectbox("Selecione o curso:", [
-    "Curso 1", "Curso 2", "Curso 3", "Curso 4",
-    "Curso 5", "Curso 6", "Curso 7", "Curso 8"
+    "Fabricação de Porta Celular em Metal - Sala ",
+"Desvendando o contracheque - Sala ",
+"Programando Um Semáforo via CLP - Sala ",
+"Introdução à modelagem 3D com SolidWorks - Sala C104 ",
+"Orçamento Eletrônico na Prática - Sala ",
+"Instalando chuveiro - Sala ",
+"Beneficiamento de arroz:  Etapas e análises no laboratório - Sala "
+"Explorando o mundo digital: Conhecimento, carreira e segurança - Sala "
+"Instalação de tomadas e luminárias - Sala "
 ])
 
 cpf = st.text_input("CPF (apenas números):")
 nome = st.text_input("Nome completo:")
-telefone = st.text_input("Telefone (apenas números):")
+telefone = st.text_input("Telefone (apenas números, coloque o 53):")
 turma = st.text_input("Turma:")
-turno = st.selectbox("Turno:", ["Manhã", "Tarde", "Noite"])
+turno = st.selectbox("Turno:", ["Manhã", "Tarde"])
 
 if st.button("📥 Enviar inscrição"):
     cpf_valido = validar_cpf(cpf)
