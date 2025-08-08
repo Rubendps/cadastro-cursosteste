@@ -1,104 +1,83 @@
 import streamlit as st
 import pandas as pd
 import os
+import re
 
-# Constantes
-CURSOS = [f"Curso {i}" for i in range(1, 9)]
-LIMITE_VAGAS = 25
-PASTA_PLANILHAS = "planilhas"
+# Criar pasta planilhas se não existir
+if not os.path.exists("planilhas"):
+    os.makedirs("planilhas")
 
-# Cria pasta se não existir
-if not os.path.exists(PASTA_PLANILHAS):
-    os.makedirs(PASTA_PLANILHAS)
-
-# CPF válido
-def validar_cpf(cpf):
-    cpf = ''.join(filter(str.isdigit, cpf))
+# Função para validar CPF
+def cpf_valido(cpf):
+    cpf = re.sub(r'\D', '', cpf)
     if len(cpf) != 11 or cpf == cpf[0] * 11:
         return False
 
-    def calc_digito(cpf, peso):
-        soma = sum(int(cpf[i]) * peso[i] for i in range(len(peso)))
-        resto = soma % 11
-        return '0' if resto < 2 else str(11 - resto)
+    for i in range(9, 11):
+        soma = sum(int(cpf[j]) * ((i + 1) - j) for j in range(i))
+        digito = ((soma * 10) % 11) % 10
+        if digito != int(cpf[i]):
+            return False
+    return True
 
-    dig1 = calc_digito(cpf[:9], list(range(10, 1, -1)))
-    dig2 = calc_digito(cpf[:9] + dig1, list(range(11, 1, -1)))
+# Função para salvar inscrição
+def salvar_inscricao(curso, nome, cpf, telefone, turma, turno):
+    arquivo = f"planilhas/{curso}.xlsx"
 
-    return cpf[-2:] == dig1 + dig2
-
-# Contar quantos inscritos existem por curso
-def contar_inscritos(curso):
-    arquivo = os.path.join(PASTA_PLANILHAS, f"{curso}.xlsx")
-    if os.path.exists(arquivo):
-        df = pd.read_excel(arquivo)
-        return len(df)
-    return 0
-
-# Verifica se CPF já está inscrito em algum curso
-def cpf_ja_cadastrado(cpf):
-    for curso in CURSOS:
-        arquivo = os.path.join(PASTA_PLANILHAS, f"{curso}.xlsx")
-        if os.path.exists(arquivo):
-            df = pd.read_excel(arquivo)
-            if cpf in df['CPF'].astype(str).values:
-                return True
-    return False
-
-# Salvar inscrição
-def salvar_inscricao(curso, nome, cpf, telefone, turma):
-    arquivo = os.path.join(PASTA_PLANILHAS, f"{curso}.xlsx")
     nova_inscricao = pd.DataFrame([{
         "Nome": nome,
         "CPF": cpf,
         "Telefone": telefone,
-        "Turma": turma
+        "Turma": turma,
+        "Turno": turno
     }])
 
-    if os.path.exists(arquivo):
-        df = pd.read_excel(arquivo)
-        df = pd.concat([df, nova_inscricao], ignore_index=True)
-    else:
-        df = nova_inscricao
-
-    df.to_excel(arquivo, index=False)
-
-# Título
-st.title("📚 Inscrição em Cursos")
-
-# Escolha do curso com contador
-curso_escolhido = st.selectbox("Selecione o curso:", [
-    f"{curso} ({contar_inscritos(curso)}/{LIMITE_VAGAS})" for curso in CURSOS
-])
-
-curso_nome = curso_escolhido.split(" (")[0]
-inscritos = contar_inscritos(curso_nome)
-
-if inscritos >= LIMITE_VAGAS:
-    st.warning("❌ Este curso está lotado. Escolha outro.")
-else:
-    st.subheader(f"Formulário de inscrição - {curso_nome}")
-
-    nome = st.text_input("Nome completo")
-    cpf = st.text_input("CPF (somente números)")
-    telefone = st.text_input("Telefone (somente números)")
-    turma = st.text_input("Turma")
-
-    if st.button("Confirmar inscrição"):
-        cpf = ''.join(filter(str.isdigit, cpf))
-        telefone = ''.join(filter(str.isdigit, telefone))
-
-        if not nome or not cpf or not telefone or not turma:
-            st.error("Preencha todos os campos.")
-        elif not validar_cpf(cpf):
-            st.error("CPF inválido.")
-        elif cpf_ja_cadastrado(cpf):
-            st.error("Este CPF já está inscrito em um curso.")
-        elif not telefone.isdigit():
-            st.error("Telefone deve conter apenas números.")
-        elif inscritos >= LIMITE_VAGAS:
-            st.error("Este curso já atingiu o limite de inscrições.")
+    try:
+        if os.path.exists(arquivo):
+            df_existente = pd.read_excel(arquivo)
         else:
-            salvar_inscricao(curso_nome, nome, cpf, telefone, turma)
-            st.success(f"Inscrição realizada com sucesso no {curso_nome}!")
+            df_existente = pd.DataFrame()
 
+        if cpf in df_existente['CPF'].astype(str).values:
+            return "⚠️ Este CPF já está inscrito neste curso."
+
+        if len(df_existente) >= 25:
+            return "❌ Limite de 25 inscritos atingido para este curso."
+
+        df_novo = pd.concat([df_existente, nova_inscricao], ignore_index=True)
+        df_novo.to_excel(arquivo, index=False)
+        return "✅ Inscrição realizada com sucesso!"
+
+    except Exception as e:
+        return f"Erro ao salvar inscrição: {e}"
+
+# Lista de cursos
+cursos = [
+    "Curso 1", "Curso 2", "Curso 3", "Curso 4",
+    "Curso 5", "Curso 6", "Curso 7", "Curso 8"
+]
+
+# Interface
+st.title("📚 Cadastro para Cursos")
+st.write("Preencha o formulário abaixo para se inscrever em um curso. Cada pessoa pode se inscrever apenas em **um** curso.")
+
+curso_escolhido = st.selectbox("📝 Escolha o curso", cursos)
+cpf = st.text_input("📇 CPF (somente números)")
+nome = st.text_input("👤 Nome completo")
+telefone = st.text_input("📞 Telefone (somente números)")
+turma = st.text_input("🏷️ Turma")
+turno = st.selectbox("🕐 Turno", ["Manhã", "Tarde", "Noite"])
+
+if st.button("Enviar inscrição"):
+    if not cpf_valido(cpf):
+        st.error("❌ CPF inválido. Verifique e tente novamente.")
+    elif not telefone.isdigit():
+        st.error("❌ Telefone deve conter apenas números.")
+    else:
+        mensagem = salvar_inscricao(curso_escolhido, nome, cpf, telefone, turma, turno)
+        if mensagem.startswith("✅"):
+            st.success(mensagem)
+        elif mensagem.startswith("⚠️"):
+            st.warning(mensagem)
+        else:
+            st.error(mensagem)
