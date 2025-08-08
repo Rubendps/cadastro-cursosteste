@@ -22,7 +22,6 @@ def validar_cpf(cpf):
     cpf = re.sub(r'\D', '', cpf)
     if len(cpf) != 11 or cpf == cpf[0] * 11:
         return False
-
     for i in range(9, 11):
         soma = sum(int(cpf[j]) * ((i + 1) - j) for j in range(i))
         digito = ((soma * 10) % 11) % 10
@@ -30,25 +29,25 @@ def validar_cpf(cpf):
             return False
     return True
 
-# Função para validar telefone (somente números e mínimo de 10 dígitos)
+# Função para validar telefone
 def validar_telefone(telefone):
-    return telefone.isdigit() and len(telefone) >= 10
+    return telefone.isdigit() and 8 <= len(telefone) <= 11
 
-# Função para salvar a inscrição em arquivo Excel
-def salvar_inscricao(curso, nome, cpf, telefone, turma):
-    if not os.path.exists("planilhas"):
-        os.makedirs("planilhas")
-
-    arquivo = f"planilhas/{curso}.xlsx"
-
-    nova_inscricao = pd.DataFrame([{
-        "Nome": nome,
-        "CPF": cpf,
-        "Telefone": telefone,
-        "Turma": turma
-    }])
-
+# Função para salvar inscrição
+def salvar_inscricao(curso, nome, cpf, telefone, turma_turno):
     try:
+        pasta = "planilhas"
+        if not os.path.exists(pasta):
+            os.makedirs(pasta)
+
+        arquivo = os.path.join(pasta, f"{curso}.xlsx")
+        nova_inscricao = pd.DataFrame([{
+            "Nome": nome,
+            "CPF": cpf,
+            "Telefone": telefone,
+            "Turma": turma_turno
+        }])
+
         if os.path.exists(arquivo):
             df_existente = pd.read_excel(arquivo)
         else:
@@ -61,27 +60,23 @@ def salvar_inscricao(curso, nome, cpf, telefone, turma):
             return "limite"
 
         df_novo = pd.concat([df_existente, nova_inscricao], ignore_index=True)
-        df_novo.to_excel(arquivo, index=False)
+        df_novo.to_excel(arquivo, index=False, engine="openpyxl")
         return "ok"
-
     except Exception as e:
-        print(f"Erro ao salvar inscrição: {e}")
+        print("Erro ao salvar:", e)
         return "erro"
 
-# Interface do usuário
+# Interface Streamlit
 st.title("📋 Formulário de Inscrição em Cursos")
 
 curso_nome = st.selectbox("Escolha o curso desejado:", cursos_disponiveis)
-
 cpf = st.text_input("CPF (somente números):")
 nome = st.text_input("Nome completo:")
 telefone = st.text_input("Telefone (somente números):")
 turma = st.text_input("Turma:")
 turno = st.selectbox("Turno:", ["Manhã", "Tarde", "Noite"])
 
-salvar = st.button("Enviar Inscrição")
-
-if salvar:
+if st.button("Enviar Inscrição"):
     cpf = re.sub(r'\D', '', cpf)
     telefone = re.sub(r'\D', '', telefone)
 
