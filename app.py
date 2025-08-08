@@ -29,16 +29,16 @@ def validar_telefone(telefone):
 st.title("📋 Cadastro de Cursos")
 st.write("Preencha os dados abaixo para se inscrever em **um único curso**.")
 
-curso = st.selectbox("Selecione o curso:", [
-    "Fabricação de Porta Celular em Metal - Sala ",
-"Desvendando o contracheque - Sala ",
-"Programando Um Semáforo via CLP - Sala ",
+curso = st.selectbox("Selecione o curso:", [ 
+    "Fabricação de Porta Celular em Metal - Sala B101 ",
+"Desvendando o contracheque - Sala C101 ",
+"Programando Um Semáforo via CLP - Sala C110 ",
 "Introdução à modelagem 3D com SolidWorks - Sala C104 ",
-"Orçamento Eletrônico na Prática - Sala ",
-"Instalando chuveiro - Sala ",
-"Beneficiamento de arroz:  Etapas e análises no laboratório - Sala ",
-"Explorando o mundo digital: Conhecimento, carreira e segurança - Sala ",
-"Instalação de tomadas e luminárias - Sala "
+"Orçamento Eletrônico na Prática - Sala C108 ",
+"Instalando chuveiro - Sala B113 ",
+"Beneficiamento de arroz:  Etapas e análises no laboratório - Sala C106 ",
+"Explorando o mundo digital: Conhecimento, carreira e segurança - Sala C102 ",
+"Instalação de tomadas e luminárias - Sala B104 "
 ])
 
 cpf = st.text_input("CPF (apenas números):")
