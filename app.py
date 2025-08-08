@@ -36,8 +36,8 @@ curso = st.selectbox("Selecione o curso:", [
 "Introdução à modelagem 3D com SolidWorks - Sala C104 ",
 "Orçamento Eletrônico na Prática - Sala ",
 "Instalando chuveiro - Sala ",
-"Beneficiamento de arroz:  Etapas e análises no laboratório - Sala "
-"Explorando o mundo digital: Conhecimento, carreira e segurança - Sala "
+"Beneficiamento de arroz:  Etapas e análises no laboratório - Sala ",
+"Explorando o mundo digital: Conhecimento, carreira e segurança - Sala ",
 "Instalação de tomadas e luminárias - Sala "
 ])
 
